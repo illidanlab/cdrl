@@ -1,2 +1,1 @@
-# cdrl
-Collaborative Deep Reinforcement Learning
+# Collaborative Deep Reinforcement Learning
