@@ -163,9 +163,3 @@ def runnohup():
 if __name__ == "__main__":
     print("YOU MUST RUN IN THE FOLDER WHERE PUT THE SCRIPTS")
     runnohup()
-    # python train.py --num-MTL-workers 8 0 --env-id PongDeterministic-v3_Riverraid-v0
-    # python train.py --num-MTL-workers 8 0 --env-id PongDeterministic-v3_Freeway-v0
-    # python train.py --num-MTL-workers 8 0 --env-id PongDeterministic-v3_Enduro-v0
-    # python train.py --num-MTL-workers 8 0 --env-id PongDeterministic-v3_Bowling-v0
-    # python train.py --num-MTL-workers 8 0 --env-id PongDeterministic-v3_Breakout-v0
-    # action space 6 games: Breakout-v0, Bowling-v0, Carnival-v0, AirRaid-v0
