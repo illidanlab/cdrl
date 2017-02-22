@@ -9,3 +9,7 @@ Collaborative Deep Reinforcement Learning (CDRL) is collaborative framework to e
 |>**CDRL**</br>
 ```python train.py --num-MTL-workers 8 8 --env-id PongDeterministic-v3_Bowling-v0```
 
+
+###Acknowledgement </br>
+This code refer to [OpenAI universe starter agent](https://github.com/openai/universe-starter-agent). 
+
