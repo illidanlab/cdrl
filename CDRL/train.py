@@ -13,7 +13,7 @@ parser.add_argument('-r', '--remotes', default=None,
                          'rewarders to use (e.g. -r vnc://localhost:5900+15900,vnc://localhost:5901+15901).')
 parser.add_argument('-e', '--env-id', type=str, default="PongDeterministic-v3_Bowling-v0",
                     help="Environment id")
-parser.add_argument('-l', '--log-dir', type=str, default="/home/linkaixi/AllData/deepRLTL/"+current_time,
+parser.add_argument('-l', '--log-dir', type=str, default="/tmp/cdrl/"+current_time,
                     help="Log directory path")
 
 

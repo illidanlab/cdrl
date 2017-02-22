@@ -40,21 +40,12 @@ def run(args, server):
                             and "global_step" not in v.name] # Adam_2 and 3 cost by the distillation train op
     pre_train_saver = FastSaver(variables_to_restore)
 
-    # variables_global_toinit = [v for v in tf.all_variables() if v.name.startswith("global0")]
-    # for v in tf.all_variables():
-    #     if v.name.startswith("global/"):
-    #         print v.name
-
 
     def init_fn(ses):
         logger.info("Initializing all parameters.")
         ses.run(init_all_op)
         pre_train_saver.restore(ses,
-                                "../expResults/20170125_09-26/train/model.ckpt-4986751")
-                                # "../expResults/20170125_09-26/train/model.ckpt-4198738")
-                                # "../expResults/20170124_15-11/train/model.ckpt-4986137")
-                      # "../expResults/20170124_15-11/train/model.ckpt-4301837")
-                      # "../expResults/20170124_15-11/train/model.ckpt-2140636")
+                                "../model/model.ckpt-4986751")
 
     config = tf.ConfigProto(device_filters=["/job:ps", "/job:worker/task:{}/cpu:0".format(args.worker_id)]) # refer to worker id
     logdir = os.path.join(args.log_dir, 'train')

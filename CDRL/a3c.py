@@ -225,7 +225,7 @@ should be computed.
             self.loss = [None] * num_tasks
             self.runner = [None] * num_tasks
             grads = [None] * num_tasks
-            self.summary_op = [[None, None] for i in np.arange(num_tasks)]  #[[None, None], [None, None]] 2 tasks
+            self.summary_op = [[None, None] for i in np.arange(num_tasks)]
             self.sync = [None] * num_tasks
             grads_and_vars = [None] * num_tasks
             self.inc_step = [None] * num_tasks
@@ -278,7 +278,7 @@ should be computed.
                 # smaller than 20 makes the algorithm more difficult to tune and to get to work.
                 # name = "worker"+str(workerid)+"task"+str(ii)
                 name = "task" + str(ii)
-                self.runner[ii] = RunnerThread(envs[ii], pi[ii], 20, name) # todo local step should be task specific
+                self.runner[ii] = RunnerThread(envs[ii], pi[ii], 20, name)
 
                 grads[ii] = tf.gradients(self.loss[ii], pi[ii].var_list)
                 summaries1 = list() # summary when it's target tasks
@@ -312,7 +312,7 @@ should be computed.
                 # knowledge distillation
                 self.target_logits[ii] = tf.placeholder(tf.float32, [None, envs[ii].action_space.n], name="target_logits")  # logits from teacher
                 Tao = 1.0  # temperature used for distillation.
-                # soft_p_temperature[ii] = tf.nn.softmax(tf.truediv(pi[ii].logits_fordistill, Tao)) # todo this is wrong if tau !=1
+
                 soft_p_temperature[ii] = tf.nn.softmax(pi[ii].logits_fordistill)
 
                 soft_t_temperature[ii] = tf.nn.softmax(tf.truediv(self.target_logits[ii], Tao))
@@ -334,7 +334,7 @@ should be computed.
                 self.logits_stu[ii] = tf.placeholder(tf.float32, [None, envs[ii].action_space.n])
                 soft_student_logits[ii] = tf.nn.softmax(self.logits_stu[ii])
                 soft_teacher_logits[ii] = tf.nn.softmax(self.local_logitProjnet[ii].logits_out)
-                self.proj_loss[ii] = proj_loss = tf.reduce_mean(tf.reduce_sum(     # todo verify this in tensorboard
+                self.proj_loss[ii] = proj_loss = tf.reduce_mean(tf.reduce_sum(
                             soft_teacher_logits[ii] * tf.log(1e-10 + tf.truediv(soft_teacher_logits[ii], soft_student_logits[ii])), 1))  # target task --> student
                 grad_logproj[ii] = tf.gradients(proj_loss, self.local_logitProjnet[ii].var_list)
                 grad_logproj[ii], _ = tf.clip_by_global_norm(grad_logproj[ii], 40.0)
@@ -378,8 +378,7 @@ process grabs a rollout that's been produced by the thread runner,
 and updates the parameters.  The update is then sent to the parameter
 server. 
 """
-        # for ii in np.arange(self.num_tasks):
-        # sess.run(self.sync[self.target_task])  # copy weights from shared to local
+
         target_task = self.target_task
         for ii in np.arange(self.num_tasks):
             sess.run(self.sync[ii])  # copy weights from shared to local
@@ -389,7 +388,6 @@ server.
 
         batch = process_rollout(rollout, gamma=0.99, lambda_=1.0)
 
-        # should_compute_summary = self.workerid == 0 and self.local_steps % 11 == 0
         should_compute_summary = self.local_steps % 11 == 0
 
         if should_compute_summary:
@@ -412,11 +410,9 @@ server.
 
         num_trainnon = self.T1[target_task]
         if fetched[-1] >= num_trainnon:
-            # print("train nonlinear mapp task " + str(target_task))
+
             'distillation knowledge from teacher net to student net.'
             aux_i = self.aux_tasks_id
-            # if fetched[-1] >= 1000000 and fetched[-1] <= 2000000:   # if less than 5 million steps
-            # print('get logits from teacher')
             feed_dict_logits = {
                 self.local_network[aux_i].x: batch.si,
                 self.local_network[aux_i].state_in[0]: batch.features[0],
@@ -442,11 +438,9 @@ server.
             featched_proj = sess.run(feaches_proj, feed_dict=feed_dict_train_logits)
 
 
-        # featched_proj = sess.run(feaches_proj, feed_dict=feed_dict_logproj)
-        num_distill = self.T2[target_task] #000000
+        num_distill = self.T2[target_task]
         # 'distill to student' start to distillation after 10 millions
         if fetched[-1] >= num_distill:
-            # print("distill task "+ str(target_task))
             feed_dict_kd = {
                 self.local_network[target_task].x: batch.si,
                 self.target_logits[target_task]: featched_mapedlogits[0],

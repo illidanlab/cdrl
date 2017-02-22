@@ -157,7 +157,7 @@ runner appends the policy to the queue.
         if not terminal_end:
             rollout.r = policy.value(last_state, *last_features)
 
-        # once we have enough experience, yield it, and have the TheradRunner place it on a queue
+        # once we have enough experience, yield it, and have the ThreadRunner place it on a queue
         yield rollout
 
 class A3C(object):
@@ -258,9 +258,8 @@ should be computed.
                 # on the one hand;  but on the other hand, we get less frequent parameter updates, which
                 # slows down learning.  In this code, we found that making local steps be much
                 # smaller than 20 makes the algorithm more difficult to tune and to get to work.
-                # name = "worker"+str(workerid)+"task"+str(ii)
                 name = "task" + str(ii)
-                self.runner[ii] = RunnerThread(envs[ii], pi[ii], 20, name) # todo local step should be task specific
+                self.runner[ii] = RunnerThread(envs[ii], pi[ii], 20, name)
 
                 grads[ii] = tf.gradients(self.loss[ii], pi[ii].var_list)
                 summaries1 = list() # summary when it's target tasks
@@ -280,7 +279,7 @@ should be computed.
 
                 grads[ii], _ = tf.clip_by_global_norm(grads[ii], 40.0)
 
-                # self.sync = [None] * self.num_tasks
+
                 zipvars = zip(pi[ii].var_list, self.network[ii].var_list)
                 self.sync[ii] = tf.group(*[v1.assign(v2) for v1, v2 in zipvars])
 
@@ -294,7 +293,6 @@ should be computed.
                 # knowledge distillation
                 self.target_logits[ii] = tf.placeholder(tf.float32, [None, envs[ii].action_space.n], name="target_logits")  # logits from teacher
                 Tao = 1.0  # temperature used for distillation.
-                # soft_p_temperature[ii] = tf.nn.softmax(tf.truediv(pi[ii].logits_fordistill, Tao)) # todo this is wrong if tau !=1
                 soft_p_temperature[ii] = tf.nn.softmax(pi[ii].logits_fordistill)
 
                 soft_t_temperature[ii] = tf.nn.softmax(tf.truediv(self.target_logits[ii], Tao))
@@ -313,21 +311,21 @@ should be computed.
             zipvars = zip(self.local_logitProjnet.var_list, self.logitProjnet.var_list)
             self.sync_logits = tf.group(*[v1.assign(v2) for v1, v2 in zipvars])
             # soft_student_logits = tf.nn.softmax(pi[target_task].logits)
-            self.logits_stu = tf.placeholder(tf.float32, [None, envs[1].action_space.n]) # Feb 6 changed envs[0].action_space.n] to envs[1].action_space.n]
+            self.logits_stu = tf.placeholder(tf.float32, [None, envs[1].action_space.n])
             soft_student_logits = tf.nn.softmax(self.logits_stu)
             soft_teacher_logits = tf.nn.softmax(self.local_logitProjnet.logits_out)
-            self.proj_loss = proj_loss = tf.reduce_mean(tf.reduce_sum(     # todo verify this in tensorboard
+            self.proj_loss = proj_loss = tf.reduce_mean(tf.reduce_sum(
                         soft_teacher_logits * tf.log(1e-12 + tf.truediv(soft_teacher_logits, soft_student_logits)), 1))  # target task --> student
             grad_logproj = tf.gradients(proj_loss, self.local_logitProjnet.var_list)
             grad_logproj, _ = tf.clip_by_global_norm(grad_logproj, 40.0)
             grads_and_vars_logproj = list(zip(grad_logproj, self.logitProjnet.var_list))
             optlgproj = tf.train.AdamOptimizer(1e-4)
             self.lgproj_trainop = optlgproj.apply_gradients(grads_and_vars_logproj)
-            summaries_proj = list() # Feb 4
-            summaries_proj.append(tf.scalar_summary("model/proj_loss", self.proj_loss))# Feb 4
-            summaries_proj.append(tf.histogram_summary("model/proj_student", soft_student_logits))# Feb 4
-            summaries_proj.append(tf.histogram_summary("model/proj_teacher", soft_teacher_logits))# Feb 4
-            self.summary_op_proj = tf.merge_summary(summaries_proj)# Feb 4
+            summaries_proj = list()
+            summaries_proj.append(tf.scalar_summary("model/proj_loss", self.proj_loss))
+            summaries_proj.append(tf.histogram_summary("model/proj_student", soft_student_logits))
+            summaries_proj.append(tf.histogram_summary("model/proj_teacher", soft_teacher_logits))
+            self.summary_op_proj = tf.merge_summary(summaries_proj)
 
             self.summary_writer = None
             self.local_steps = 0
@@ -400,8 +398,6 @@ server.
 
             'distillation knowledge from teacher net to student net.'
             aux_i = self.aux_tasks_id
-            # if fetched[-1] >= 1000000 and fetched[-1] <= 2000000:   # if less than 5 million steps
-            # print('get logits from teacher')
             feed_dict_logits = {
                 self.local_network[aux_i].x: batch.si,
                 self.local_network[aux_i].state_in[0]: batch.features[0],
@@ -425,18 +421,9 @@ server.
             feed_dict_train_logits = {self.local_logitProjnet.x: fetched_logits[0],
                                       self.logits_stu: fetched[-2]}
             featched_proj = sess.run(feaches_proj, feed_dict=feed_dict_train_logits)
-            # todo debug replay
-            # self.replay_buffer.append(feed_dict_train_logits)
-            # if len(self.replay_buffer) > 50:
-            #     print("start replay")
-            #     inds = np.random.permutation(len(self.replay_buffer))[:5]
-            #     for i in inds:
-            #         sess.run(feaches_proj, feed_dict=self.replay_buffer[i])
 
-
-        # featched_proj = sess.run(feaches_proj, feed_dict=feed_dict_logproj)
-        num_distill = 2000000 #000000
-        # 'distill to student' start to distillation after 10 millions
+        num_distill = 2000000
+        # 'distill to student' start to distillation after num_distill millions
         if fetched[-1] >= num_distill : #and fetched[-1] <= 10000000 :
             feed_dict_kd = {
                 self.local_network[target_task].x: batch.si,

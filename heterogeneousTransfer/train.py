@@ -15,7 +15,7 @@ parser.add_argument('-r', '--remotes', default=None,
                          'rewarders to use (e.g. -r vnc://localhost:5900+15900,vnc://localhost:5901+15901).')
 parser.add_argument('-e', '--env-id', type=str, default="PongDeterministic-v3_Bowling-v0",
                     help="Environment id")
-parser.add_argument('-l', '--log-dir', type=str, default="/home/linkaixi/AllData/deepRLTL/"+current_time,
+parser.add_argument('-l', '--log-dir', type=str, default="/tmp/cdrl/"+current_time,
                     help="Log directory path")
 
 
@@ -124,16 +124,8 @@ def create_nohup_commands(session, args, shell='sh'):
     cmds += ['echo \'kill -9 \'' + "$ps " + " ".join(["$w"+str(i) for i in range(num_workers)]) + " > " + logdir + "/kill_process.sh"]
     return cmds
 
-# def copy_files(logdir): # Feb 4
-#
-#     dest = "{}/scripts/".format(logdir)
-#     src = "./"
-#     src_files = os.listdir(src)
-#     for file_name in src_files:
-#         full_file_name = os.path.join(src, file_name)
-#         if (os.path.isfile(full_file_name)):
-#             shutil.copy(full_file_name, dest+full_file_name)
-def copy_files(logdir): # Feb 4
+
+def copy_files(logdir):
 
     dest = "{}/scripts/".format(logdir)
     src = "./"
