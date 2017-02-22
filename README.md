@@ -7,8 +7,6 @@ Collaborative Deep Reinforcement Learning (CDRL) is a collaborative framework to
 * Python 2.7
 * [six](https://pypi.python.org/pypi/six) (for py2/3 compatibility)
 * [TensorFlow](https://www.tensorflow.org/) 0.11
-* [tmux](https://tmux.github.io/) (the start script opens up a tmux session with multiple windows)
-* [htop](https://hisham.hm/htop/) (shown in one of the tmux windows)
 * [gym](https://pypi.python.org/pypi/gym)
 * gym[atari]
 * [universe](https://pypi.python.org/pypi/universe)
