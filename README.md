@@ -32,7 +32,7 @@ Collaborative Deep Reinforcement Learning (CDRL) is a collaborative framework to
 >```python train.py --num-MTL-workers 8 8 --env-id PongDeterministic-v3_Bowling-v0```
 
 
-### Paper: 
+### Preprint: 
 [Collaborative Deep Reinforcement Learning](https://128.84.21.199/abs/1702.05796) </br>
  Kaixiang Lin, Shu Wang and Jiayu Zhou</br> 
 
