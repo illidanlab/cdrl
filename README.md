@@ -36,6 +36,6 @@ Collaborative Deep Reinforcement Learning (CDRL) is a collaborative framework to
 [Collaborative Deep Reinforcement Learning](https://128.84.21.199/abs/1702.05796) </br>
  Kaixiang Lin, Shu Wang and Jiayu Zhou</br> 
 
-###Acknowledgement </br>
-This code refer to [OpenAI universe starter agent](https://github.com/openai/universe-starter-agent). 
+### Acknowledgement </br>
+This code refers to [OpenAI universe starter agent](https://github.com/openai/universe-starter-agent). 
 
